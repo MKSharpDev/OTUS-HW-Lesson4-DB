@@ -14,7 +14,7 @@ namespace DB_HW_Lesson4
         public DbSet<Client> clients { get; set; }
         public DbSet<Deposit> deposits { get; set; }
 
-
+        public DbSet<withdrawal> withdrawals { get; set; }
         public DataContext() 
         {
             Database.EnsureCreated();
