@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using System;
 using System.Collections.Generic;
+using System.Runtime.ConstrainedExecution;
 
 
-//const string connectionString = "Host=localhost:5433;Username=postgres;Password=pass;Database=otus_HW";
 
 
 #region SberHW
@@ -191,6 +191,8 @@ while (!exit)
     string  command = Console.ReadLine().ToString();
     int clientId = new int();
     decimal amaunt = new decimal();
+    Random rnd = new Random();
+    int count;
     switch (command)
     {
         case "add":
@@ -222,6 +224,28 @@ while (!exit)
             amaunt = decimal.Parse(Console.ReadLine());
             Deposit(clientId, amaunt);
             break;
+        case "randDepo":
+            using(DataContext db = new DataContext())
+            {
+                var clients = db.clients.ToList();
+                count = clients.Count;
+            }
+            for (int i = 0; i < 5; i++)
+            {
+                Deposit(rnd.Next(count), rnd.Next(50)*1000);
+            }
+            break;
+        case "randWith":
+            using (DataContext db = new DataContext())
+            {
+                var clients = db.clients.ToList();
+                count = clients.Count;
+            }
+            for (int i = 0; i < 5; i++)
+            {
+                Withdraw(rnd.Next(count), rnd.Next(50) * 1000);
+            }
+            break;
         case "with":
             Console.WriteLine("С кого снять");
             clientId = int.Parse(Console.ReadLine());
@@ -230,7 +254,8 @@ while (!exit)
             Withdraw(clientId, amaunt);
             break;
         case "help":
-            Console.WriteLine("выход  - exit , depo, with, add, allcl, alldepo, allwith, get, del  ");
+            Console.WriteLine("выход  - exit , depo, with, allcl, alldepo, allwith, get, del  ");
+            Console.WriteLine(" add - добавть 10 клиентов, randWith - добавить 5 транзакций в вывод, randDepo - добавить 5 транзакций в депозит");
             break;
         case "exit":
             exit = true;
@@ -240,104 +265,5 @@ while (!exit)
             break;
     }
 }
-
-//AddRandomUsers();
-//AddRandomUsers();
-//AddRandomUsers();
-//Console.WriteLine();
-//GetAllClients();
-//Console.WriteLine();
-
-//GetOne(20);
-//Console.WriteLine();
-//Withdraw(20, 10000);
-//Console.WriteLine();
-//Withdraw(20, 10000000);
-//GetOne(20);
-
-
-
-
-
 #endregion
-
-//#region MyRegion
-
-//static void GetVersion()
-//{
-//    using (var connection = new NpgsqlConnection(connectionString))
-//    {
-//        connection.Open();
-
-//        var sql = "SELECT version()";
-
-//        using var cmd = new NpgsqlCommand(sql, connection);
-//        var version = cmd.ExecuteScalar().ToString();
-//        Console.WriteLine($"PostgreSQL version: {version}");
-//    }
-//}
-
-//static void CreateTable(string tables)
-//{
-//    using (var connection = new NpgsqlConnection(connectionString))
-//    {
-//        connection.Open();
-
-//        var sql = $"{tables}";
-
-//        using var cmd = new NpgsqlCommand(sql, connection);
-
-//        var affectedRowsCount = cmd.ExecuteNonQuery().ToString();
-
-//        Console.WriteLine($"Created CLIENTS table. Affected rows count: {affectedRowsCount}");
-//    }
-//}
-
-//static void AddData(string data)
-//{
-//    using (var connection = new NpgsqlConnection(connectionString))
-//    {
-//        connection.Open();
-
-//        var sql = $"{data}";
-
-//        using var cmd = new NpgsqlCommand(sql, connection);
-
-//        var affectedRowsCount = cmd.ExecuteNonQuery().ToString();
-
-//        Console.WriteLine($"Add data. Affected rows count: {affectedRowsCount}");
-//    }
-//}
-
-
-////GetVersion();
-
-////string newTables = @"
-////CREATE SEQUENCE users_id;
-
-////CREATE TABLE users
-////(
-////    id          BIGINT                      NOT NULL    DEFAULT NEXTVAL('users_id'),
-////    name        CHARACTER VARYING(255)      NOT NULL,
-////    surname     CHARACTER VARYING(255)      NOT NULL,
-////    position    CHARACTER VARYING(255)      NOT NULL
-
-////)
-////";
-
-////CreateTable(newTables);
-
-//string innData = @"
-//INSERT INTO users(name, surname, position) 
-//VALUES ('Самуил', 'Аристархович', 'НИИ Алкотест');
-
-//INSERT INTO users(name, surname, position) 
-//VALUES ('Павел', 'Кондратьев', 'ПАО Фиолент');
-//";
-//AddData(innData);
-
-
-
-
-//#endregion  
 
