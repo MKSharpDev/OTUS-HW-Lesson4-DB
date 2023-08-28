@@ -9,7 +9,8 @@ namespace DB_HW_Lesson4.Entities
     public class Deposit
     {
         public int Id { get; set; }
-        public decimal amount { get; set; }
-        public Client Client { get; set; }
+        public decimal Amount { get; set; }
+        public int ClientId{ get; set; }
+        public virtual Client Client { get; set; }
     }
 }

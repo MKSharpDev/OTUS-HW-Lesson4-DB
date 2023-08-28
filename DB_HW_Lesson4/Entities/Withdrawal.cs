@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace DB_HW_Lesson4.Entities
 {
-    public class withdrawal
+    public class Withdrawal
     {
 
         public int Id { get; set; }
-        public int amount { get; set; }
-
-        public Client Client { get; set; }
+        public decimal Amount { get; set; }
+        public int ClientId { get; set; }
+        public virtual Client Client { get; set; }
 
     }
 }

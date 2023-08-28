@@ -11,10 +11,10 @@ namespace DB_HW_Lesson4
 {
     public class DataContext: DbContext 
     {
-        public DbSet<Client> clients { get; set; }
+        public DbSet<Client> clients { get; set; } 
         public DbSet<Deposit> deposits { get; set; }
 
-        public DbSet<withdrawal> withdrawals { get; set; }
+        public DbSet<Withdrawal> withdrawals { get; set; }
         public DataContext() 
         {
             Database.EnsureCreated();
