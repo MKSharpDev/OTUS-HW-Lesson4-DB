@@ -186,6 +186,53 @@ static void Withdraw(int clientId, decimal amount)
 
 Console.WriteLine("Что хотим? Получить список команд - help");
 bool exit = false;
+
+static void RandDeposit()
+{
+    Random rnd = new Random();
+    int count;
+    using (DataContext db = new DataContext())
+    {
+        var clients = db.clients.ToList();
+        count = clients.Count;
+    }
+    if (count > 0)
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            Deposit(rnd.Next(count), rnd.Next(50) * 1000);
+        }
+    }
+    else
+    {
+        Console.WriteLine("В банке нет пользвоателей");
+    }
+
+}
+
+static void RandWithdraw()
+{
+    Random rnd = new Random();
+    int count;
+    using (DataContext db = new DataContext())
+    {
+        var clients = db.clients.ToList();
+        count = clients.Count;
+    }
+    if (count > 0)
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            Withdraw(rnd.Next(count), rnd.Next(50) * 1000);
+        }
+    }
+    else
+    {
+        Console.WriteLine("В банке нет пользвоателей");
+    }
+
+}
+
 while (!exit)
 {
     string  command = Console.ReadLine().ToString();
@@ -225,26 +272,10 @@ while (!exit)
             Deposit(clientId, amaunt);
             break;
         case "randDepo":
-            using(DataContext db = new DataContext())
-            {
-                var clients = db.clients.ToList();
-                count = clients.Count;
-            }
-            for (int i = 0; i < 5; i++)
-            {
-                Deposit(rnd.Next(count), rnd.Next(50)*1000);
-            }
+            RandDeposit();
             break;
         case "randWith":
-            using (DataContext db = new DataContext())
-            {
-                var clients = db.clients.ToList();
-                count = clients.Count;
-            }
-            for (int i = 0; i < 5; i++)
-            {
-                Withdraw(rnd.Next(count), rnd.Next(50) * 1000);
-            }
+            RandWithdraw();
             break;
         case "with":
             Console.WriteLine("С кого снять");
