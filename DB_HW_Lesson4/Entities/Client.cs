@@ -9,15 +9,15 @@ namespace DB_HW_Lesson4.Entities
     public class Client
     {
 
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string LastName { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
+        public string lastName { get; set; }
 
-        public decimal Balance { get; set; }
-        public string Email { get; set; }
+        public decimal balance { get; set; }
+        public string email { get; set; }
 
-        public virtual List<Deposit> Deposits { get; set; } = new();
-        public virtual List<Withdrawal> Withdrawals { get; set; } = new();
+        public virtual List<Deposit> deposits { get; set; } = new();
+        public virtual List<Withdrawal> withdrawals { get; set; } = new();
 
 
     }

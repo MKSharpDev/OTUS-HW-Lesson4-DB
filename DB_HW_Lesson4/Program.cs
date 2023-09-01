@@ -10,12 +10,107 @@ using System.Runtime.ConstrainedExecution;
 
 
 
+#region SQL scripts 
+
+const string connectionString = "Host=localhost:5433;Username=postgres;Password=pass;Database=otus_HW";
+
+static void AddDepositsSQL()
+{
+
+    using (var connection = new NpgsqlConnection(connectionString))
+    {
+        connection.Open();
+
+        var sql = $"INSERT INTO deposits " +
+            $"\r\nVALUES(\r\n\t(SELECT max(deposits.id) from deposits) + 1, " +
+            $"\r\n\tfloor(random() * 1000)," +
+            $"\r\n\tfloor(random() * (SELECT max(clients.id) from clients)  " +
+            $"\r\n))";
+
+        using var cmd = new NpgsqlCommand(sql, connection);
+
+        var affectedRowsCount = cmd.ExecuteNonQuery().ToString();
+
+        Console.WriteLine($"Add data. Affected rows count: {affectedRowsCount}");
+    }
+
+}
+
+static void AddWithdrawalsSQL()
+{
+
+    using (var connection = new NpgsqlConnection(connectionString))
+    {
+        connection.Open();
+
+        var sql = $"INSERT INTO withdrawals " +
+            $"\r\nVALUES(\r\n\t(SELECT max(withdrawals.id) from withdrawals) + 1, " +
+            $"\r\n\tfloor(random() * 1000)," +
+            $"\r\n\tfloor(random() * (SELECT max(clients.id) from clients)  " +
+            $"\r\n))";
+
+        using var cmd = new NpgsqlCommand(sql, connection);
+
+
+        var affectedRowsCount = cmd.ExecuteNonQuery().ToString();
+
+        Console.WriteLine($"Add data. Affected rows count: {affectedRowsCount}");
+    }
+
+}
+
+static void AddClientssSQL()
+{
+    Random random = new Random();
+
+    List<string> names = new List<string>()                 //Необходимо для генерации имени и фамилии
+{   "Павел", "Василий", "Адам", "Иван", "Виктор", "Артемий",
+    "Кирилл", "Матвей", "Тимофей", "Игорь", "Артём", "Максим", "Михаил" };
+
+
+    List<string> lastName = new List<string>()
+{   "Крючков", "Киселев", "Кириллов", "Кузнецов", "Куликов", "Лапин",
+    "Лебедев", "Логинов", "Лукьянов", "Медведев", "Мельников", "Николаев", "Панин" };
+
+    string surname = lastName[random.Next(lastName.Count)];
+
+    using (var connection = new NpgsqlConnection(connectionString))
+    {
+        connection.Open();
+
+        var sql = $"INSERT INTO clients VALUES((SELECT max(clients.id) from clients) + 1, " +
+            $"'{names[random.Next(names.Count)]}', '{surname}', floor(random() * 1000), " +
+            $"'{surname}{random.Next(1000)}@ya.ru')" ;
+
+        using var cmd = new NpgsqlCommand(sql, connection);
+
+        var affectedRowsCount = cmd.ExecuteNonQuery().ToString();
+
+        Console.WriteLine($"Add data. Affected rows count: {affectedRowsCount}");
+    }
+
+}
+
+static void AddData()
+{
+    for (int i = 0; i < 5; i++)
+    {
+        AddClientssSQL();
+        AddDepositsSQL();
+        AddWithdrawalsSQL();
+    }
+}
+
+
+AddData();
+
+#endregion
 
 #region SberHW
 
 static void ConsoleShow(Client client)
 {
-    Console.WriteLine($" {client.Id,-5} {client.Name,-10} {client.LastName,-10} {client.Balance,-10} {client.Email,-10} ");
+    Console.WriteLine($" {client.id,-5} {client.name,-10} {client.lastName,-10} {client.balance,-10} {client.email,-10} ");
 }
 
 static void AddRandomUsers()        //Генерирует рандомных юзеров
@@ -32,26 +127,26 @@ static void AddRandomUsers()        //Генерирует рандомных ю
     "Лебедев", "Логинов", "Лукьянов", "Медведев", "Мельников", "Николаев", "Панин" };
 
 
-    List<Client> clients = new List<Client>();                      
+    List<Client> clients = new List<Client>();
     for (int i = 0; i < 10; i++)                                    //Создвем 10 рандомных юзеров
     {
         Client client = new Client();
         //client.Id = Guid.NewGuid();   Планировалось на гуидах, на в консоле добавить юзеру ID 10  сто рублей проще
-        client.Name = names[random.Next(names.Count)];
-        client.LastName = lastName[random.Next(lastName.Count )];
-        client.Balance = random.Next(1000)*1000;            //рандомный баланс с округлением до 1000
-        client.Email = client.LastName + random.Next(10000) + "@ya.ru";
+        client.name = names[random.Next(names.Count)];
+        client.lastName = lastName[random.Next(lastName.Count)];
+        client.balance = random.Next(1000) * 1000;            //рандомный баланс с округлением до 1000
+        client.email = client.lastName + random.Next(10000) + "@ya.ru";
         clients.Add(client);
     }
 
-    foreach(Client client in clients)                   //выводим на консоль
+    foreach (Client client in clients)                   //выводим на консоль
     {
-        Console.WriteLine($" {client.Name} {client.LastName} {client.Balance} {client.Email} ");
+        Console.WriteLine($" {client.name} {client.lastName} {client.balance} {client.email} ");
     }
 
     foreach (Client client in clients)                  //записываем в бд
     {
-        using(DataContext db = new DataContext())
+        using (DataContext db = new DataContext())
         {
             db.clients.Add(client);
             db.SaveChanges();
@@ -75,7 +170,7 @@ static void GetAllWithdrow()
     using (DataContext db = new DataContext())
     {
         var withds = db.withdrawals.ToList();
-        foreach (Withdrawal withd in withds) { Console.WriteLine($"Id транзакции {withd.Id} клиент с ID {withd.ClientId} снял {withd.Amount}"); };
+        foreach (Withdrawal withd in withds) { Console.WriteLine($"Id транзакции {withd.id} клиент с ID {withd.clientId} снял {withd.amount}"); };
     }
 
 }
@@ -85,7 +180,7 @@ static void GetAllDeposits()
     using (DataContext db = new DataContext())
     {
         var deposits = db.deposits.ToList();
-        foreach (Deposit deposit in deposits) { Console.WriteLine($"Id транзакции {deposit.Id} клиент с ID {deposit.ClientId} положил {deposit.Amount}"); };
+        foreach (Deposit deposit in deposits) { Console.WriteLine($"Id транзакции {deposit.id} клиент с ID {deposit.clientId} положил {deposit.amount}"); };
     }
 
 }
@@ -93,12 +188,12 @@ static void DeleteClient(int clientId)
 {
     using (DataContext db = new DataContext())
     {
-        var client = db.clients.FirstOrDefault(x => x.Id == clientId);
+        var client = db.clients.FirstOrDefault(x => x.id == clientId);
         if (client != null)
         {
             db.clients.Remove(client);
             db.SaveChanges();
-            Console.WriteLine($"{client.Id} удален");
+            Console.WriteLine($"{client.id} удален");
 
         }
         else { Console.WriteLine("Что то пошло не так"); }
@@ -108,9 +203,9 @@ static void DeleteClient(int clientId)
 
 static void GetOne(int clientId)
 {
-    using (DataContext db = new DataContext()) 
-    { 
-        var client = db.clients.FirstOrDefault(x => x.Id == clientId);
+    using (DataContext db = new DataContext())
+    {
+        var client = db.clients.FirstOrDefault(x => x.id == clientId);
         if (client != null)
         {
             ConsoleShow(client);
@@ -124,21 +219,21 @@ static void GetOne(int clientId)
 
 static void Deposit(int clientId, decimal amount)
 {
-    using(DataContext db = new DataContext())
+    using (DataContext db = new DataContext())
     {
-        var client = db.clients.FirstOrDefault(c => c.Id == clientId);
+        var client = db.clients.FirstOrDefault(c => c.id == clientId);
         if (client != null)
         {
             Deposit deposit = new Deposit();
             deposit.Client = client;
-            deposit.Amount = amount;
-            client.Balance = client.Balance + deposit.Amount;
+            deposit.amount = amount;
+            client.balance = client.balance + deposit.amount;
             db.deposits.Add(deposit);
 
 
             db.SaveChanges();
-            Console.WriteLine($"Клиент {client.Id} {client.Name} {client.LastName}  положил {deposit.Amount} на свой счет");
-            ConsoleShow(client);    
+            Console.WriteLine($"Клиент {client.id} {client.name} {client.lastName}  положил {deposit.amount} на свой счет");
+            ConsoleShow(client);
             Console.WriteLine();
 
         }
@@ -154,25 +249,25 @@ static void Withdraw(int clientId, decimal amount)
     using (DataContext db = new DataContext())
     {
 
-        var client = db.clients.FirstOrDefault(c => c.Id == clientId);
+        var client = db.clients.FirstOrDefault(c => c.id == clientId);
         if (client != null)
         {
             Withdrawal wthdraw = new Withdrawal();
             wthdraw.Client = client;
-            wthdraw.Amount = amount;
-            if (client.Balance >= amount)
+            wthdraw.amount = amount;
+            if (client.balance >= amount)
             {
-                client.Balance = client.Balance - wthdraw.Amount;
+                client.balance = client.balance - wthdraw.amount;
                 db.withdrawals.Add(wthdraw);
                 db.SaveChanges();
 
-                Console.WriteLine($"Клиент {client.Id} {client.Name} {client.LastName}  снял {wthdraw.Amount} со своего счета");
+                Console.WriteLine($"Клиент {client.id} {client.name} {client.lastName}  снял {wthdraw.amount} со своего счета");
                 ConsoleShow(client);
                 Console.WriteLine();
             }
             else
             {
-                Console.WriteLine($" Клиент {client.Id} {client.Name} {client.LastName} не может снять {wthdraw.Amount}, на счету клиента {client.Balance}");
+                Console.WriteLine($" Клиент {client.id} {client.name} {client.lastName} не может снять {wthdraw.amount}, на счету клиента {client.balance}");
             }
 
 
@@ -187,7 +282,7 @@ static void Withdraw(int clientId, decimal amount)
 Console.WriteLine("Что хотим? Получить список команд - help");
 bool exit = false;
 
-static void RandDeposit()
+static void RandDeposit()       //генерируем 5 записей в таблицу депозитов
 {
     Random rnd = new Random();
     int count;
@@ -210,7 +305,7 @@ static void RandDeposit()
 
 }
 
-static void RandWithdraw()
+static void RandWithdraw() //генерируем 5 записей в таблицу выводов
 {
     Random rnd = new Random();
     int count;
@@ -235,7 +330,7 @@ static void RandWithdraw()
 
 while (!exit)
 {
-    string  command = Console.ReadLine().ToString();
+    string command = Console.ReadLine().ToString();
     int clientId = new int();
     decimal amaunt = new decimal();
     Random rnd = new Random();
@@ -266,7 +361,7 @@ while (!exit)
             break;
         case "depo":
             Console.WriteLine("Кому положить");
-            clientId = int.Parse(Console.ReadLine());   
+            clientId = int.Parse(Console.ReadLine());
             Console.WriteLine("Сколько положить");
             amaunt = decimal.Parse(Console.ReadLine());
             Deposit(clientId, amaunt);
